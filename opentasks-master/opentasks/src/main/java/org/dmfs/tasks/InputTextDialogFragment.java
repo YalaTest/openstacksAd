@@ -185,6 +185,7 @@ public class InputTextDialogFragment extends SupportDialogFragment implements On
             public void onClick(View v)
             {
                 handleSave();
+
             }
         });
 
