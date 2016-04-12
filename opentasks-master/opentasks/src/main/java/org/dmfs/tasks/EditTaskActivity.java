@@ -53,6 +53,7 @@ public class EditTaskActivity extends ActionBarActivity
 
 	private String mAuthority;
 
+	private BaseActivity baseActivity;
 
 	@TargetApi(11)
 	@Override

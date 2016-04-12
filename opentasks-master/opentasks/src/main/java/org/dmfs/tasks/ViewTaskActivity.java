@@ -43,6 +43,7 @@ import android.view.WindowManager;
 public class ViewTaskActivity extends AppCompatActivity implements ViewTaskFragment.Callback
 {
 
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{

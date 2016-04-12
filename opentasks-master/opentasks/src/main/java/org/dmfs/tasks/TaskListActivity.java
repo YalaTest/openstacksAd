@@ -358,6 +358,7 @@ public class TaskListActivity extends BaseActivity implements TaskListFragment.C
 		});
 
 		mFloatingActionButton = (FloatingActionButton) findViewById(R.id.floating_action_button);
+
 		if (mFloatingActionButton != null)
 		{
 			mFloatingActionButton.setOnClickListener(new OnClickListener()
