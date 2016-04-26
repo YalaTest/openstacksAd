@@ -62,6 +62,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -71,6 +72,10 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.animation.AlphaAnimation;
 import android.widget.TextView;
+
+import me.kiip.sdk.Kiip;
+import me.kiip.sdk.KiipFragmentCompat;
+import me.kiip.sdk.Poptart;
 
 
 /**
@@ -166,6 +171,20 @@ public class ViewTaskFragment extends SupportFragment implements OnModelLoadedLi
 		}
 	};
 
+	private BaseAct baseAct;
+
+    private KiipFragmentCompat mKiipFragment;
+
+//    private class KiipFragmentCustum extends KiipFragmentCompat {
+//        private ViewTaskFragment viewFragment;
+//
+//
+//
+//        public void setView(ViewTaskFragment view){
+//            viewFragment = view;
+//        }
+//    }
+
 	public interface Callback
 	{
 		/**
@@ -223,6 +242,15 @@ public class ViewTaskFragment extends SupportFragment implements OnModelLoadedLi
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+        mKiipFragment = new KiipFragmentCompat();
+//        mKiipFragment.setView(this);
+        mKiipFragment.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                ViewTaskFragment.this.completeTask();
+            }
+        });
+        getActivity().getSupportFragmentManager().beginTransaction().add(mKiipFragment, "moment").commit();
 
 		setHasOptionsMenu(true);
 	}
@@ -273,9 +301,8 @@ public class ViewTaskFragment extends SupportFragment implements OnModelLoadedLi
 
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-	{
-		mShowFloatingActionButton = getResources().getBoolean(R.bool.opentasks_enabled_detail_view_fab);
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mShowFloatingActionButton = getResources().getBoolean(R.bool.opentasks_enabled_detail_view_fab);
 
 		mRootView = inflater.inflate(R.layout.fragment_task_view_detail, container, false);
 		mContent = (ViewGroup) mRootView.findViewById(R.id.content);
@@ -285,7 +312,11 @@ public class ViewTaskFragment extends SupportFragment implements OnModelLoadedLi
 		mToolBar.setTitle("");
 		mAppBar.addOnOffsetChangedListener(this);
 
-		animate(mToolBar.findViewById(R.id.toolbar_title), 0, View.INVISIBLE);
+
+		baseAct = new BaseAct();
+//        baseAct.onCreate(savedInstanceState);
+
+        animate(mToolBar.findViewById(R.id.toolbar_title), 0, View.INVISIBLE);
 
 		mFloatingActionButton = (FloatingActionButton) mRootView.findViewById(R.id.floating_action_button);
 		showFloatingActionButton(false);
@@ -295,7 +326,25 @@ public class ViewTaskFragment extends SupportFragment implements OnModelLoadedLi
 			@Override
 			public void onClick(View v)
 			{
-				completeTask();
+
+				String my_moment_id = "test_moment_id1";
+				Kiip.getInstance().saveMoment(my_moment_id, new Kiip.Callback() {
+
+                    @Override
+                    public void onFinished(Kiip kiip, Poptart reward) {
+                        if (reward == null) {
+                            Log.d("kiip_fragment_ta", "Successful moment but no reward to give.");
+                        } else {
+                            mKiipFragment.showPoptart(reward);
+                        }
+                    }
+
+                    @Override
+                    public void onFailed(Kiip kiip, Exception exception) {
+                        // handle failure
+                    }
+                });
+                //completeTask();
 			}
 		});
 
@@ -335,7 +384,6 @@ public class ViewTaskFragment extends SupportFragment implements OnModelLoadedLi
 		super.onPause();
 		persistTask();
 	}
-
 
 	private void persistTask()
 	{
@@ -609,6 +657,7 @@ public class ViewTaskFragment extends SupportFragment implements OnModelLoadedLi
 	 */
 	private void completeTask()
 	{
+
 		TaskFieldAdapters.STATUS.set(mContentSet, Tasks.STATUS_COMPLETED);
 		TaskFieldAdapters.PINNED.set(mContentSet, false);
 		persistTask();
@@ -621,6 +670,7 @@ public class ViewTaskFragment extends SupportFragment implements OnModelLoadedLi
 			// hide fab in two pane mode
 			mFloatingActionButton.hide();
 		}
+
 	}
 
 
@@ -866,4 +916,15 @@ public class ViewTaskFragment extends SupportFragment implements OnModelLoadedLi
 			toolbar.setLayoutParams(p);
 		}
 	}
+
+    private class BaseAct extends BaseActivity {
+        public BaseAct() {
+            super();
+        }
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+        }
+    }
 }
+
+

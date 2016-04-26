@@ -71,6 +71,9 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 
+import me.kiip.sdk.Kiip;
+import me.kiip.sdk.Poptart;
+
 
 /**
  * An activity representing a list of Tasks. This activity has different presentations for handset and tablet-size devices. On handsets, the activity presents a
@@ -87,7 +90,7 @@ import android.view.WindowManager;
  * 
  * @author Tobias Reinsch <tobias@dmfs.org>
  */
-public class TaskListActivity extends AppCompatActivity implements TaskListFragment.Callbacks, ViewTaskFragment.Callback
+public class TaskListActivity extends BaseActivity implements TaskListFragment.Callbacks, ViewTaskFragment.Callback
 {
 
 	/** Tells the activity to display the details of the task with the URI from the intent data. **/
@@ -355,15 +358,33 @@ public class TaskListActivity extends AppCompatActivity implements TaskListFragm
 		});
 
 		mFloatingActionButton = (FloatingActionButton) findViewById(R.id.floating_action_button);
+
 		if (mFloatingActionButton != null)
 		{
 			mFloatingActionButton.setOnClickListener(new OnClickListener()
 			{
-
 				@Override
 				public void onClick(View v)
 				{
-					onAddNewTask();
+                    onAddNewTask();
+
+                    String my_moment_id = "test-moment-id";
+					Kiip.getInstance().saveMoment(my_moment_id, new Kiip.Callback() {
+
+						@Override
+						public void onFinished(Kiip kiip, Poptart reward) {
+							if (reward == null) {
+                                Log.d("kiip_fragment_ta", "Successful moment but no reward to give.");
+                            } else {
+								onPoptart(reward);
+							}
+						}
+
+						@Override
+						public void onFailed(Kiip kiip, Exception exception) {
+							// handle failure
+						}
+					});
 				}
 			});
 		}
